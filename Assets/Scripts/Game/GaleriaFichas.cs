@@ -37,7 +37,7 @@ public class GaleriaFichas : MonoBehaviour
 
     void MostrarCadenaDeEjemplo()
     {
-        // Simula las primeras jugadas de una partida para tener una cadena válida.
+
         var p = new Partida(new[] { "A", "B" }, new ReglaLicuados(), 11);
         p.Iniciar();
         while (!p.Terminada && p.Tablero.Cadena.Count < 7)
@@ -61,11 +61,11 @@ public class GaleriaFichas : MonoBehaviour
 
     void MostrarBocaAbajo()
     {
-        // Como la mano del rival: 7 fichas encimadas.
+
         for (int i = 0; i < 7; i++)
             Crear(new Vector2(-300f + i * 45f, -370f)).MostrarBocaAbajo();
 
-        // Como el pozo: una ficha acostada.
+
         Crear(new Vector2(250f, -370f)).MostrarBocaAbajo(true);
     }
 

@@ -5,6 +5,7 @@ namespace Licuadomino.Core
 {
     public enum Lado { Izquierda, Derecha }
 
+
     public readonly struct FichaColocada
     {
         public readonly Ficha Ficha;
@@ -20,6 +21,7 @@ namespace Licuadomino.Core
 
         public override string ToString() => $"[{FrutaInfo.Nombre(Izq)}|{FrutaInfo.Nombre(Der)}]";
     }
+
 
     public readonly struct Jugada
     {
@@ -37,6 +39,7 @@ namespace Licuadomino.Core
         public override string ToString() => $"{Ficha} en {Lado} tocando con {FrutaInfo.Nombre(Toca)}";
     }
 
+
     public class Tablero
     {
         readonly List<FichaColocada> cadena = new List<FichaColocada>();
@@ -44,6 +47,9 @@ namespace Licuadomino.Core
         public IReglaCompatibilidad Regla { get; }
         public IReadOnlyList<FichaColocada> Cadena => cadena;
         public bool Vacio => cadena.Count == 0;
+
+
+        public int IdFichaInicial { get; private set; } = -1;
 
         public Tablero(IReglaCompatibilidad regla)
         {
@@ -56,6 +62,7 @@ namespace Licuadomino.Core
             return lado == Lado.Izquierda ? cadena[0].Izq : cadena[cadena.Count - 1].Der;
         }
 
+
         public ResultadoConexion Validar(Jugada j)
         {
             if (!j.Ficha.Tiene(j.Toca))
@@ -64,6 +71,7 @@ namespace Licuadomino.Core
                 return ResultadoConexion.Ok("¡Arranca el licuado!");
             return Regla.Evaluar(Extremo(j.Lado), j.Toca);
         }
+
 
         public ResultadoConexion Colocar(Jugada j)
         {
@@ -74,7 +82,10 @@ namespace Licuadomino.Core
             Fruta libre = f.Otra(j.Toca);
 
             if (Vacio)
+            {
                 cadena.Add(new FichaColocada(f, f.A, f.B));
+                IdFichaInicial = f.Id;
+            }
             else if (j.Lado == Lado.Derecha)
                 cadena.Add(new FichaColocada(f, j.Toca, libre));
             else
@@ -115,7 +126,11 @@ namespace Licuadomino.Core
             return false;
         }
 
-        public void Limpiar() => cadena.Clear();
+        public void Limpiar()
+        {
+            cadena.Clear();
+            IdFichaInicial = -1;
+        }
 
         void TryAgregar(List<Jugada> lista, Jugada j)
         {
