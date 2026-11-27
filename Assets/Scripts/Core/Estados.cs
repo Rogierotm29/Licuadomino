@@ -44,6 +44,12 @@ namespace Licuadomino.Core
             cmd.Ejecutar(p);
             p.RegistrarEnHistorial(cmd);
 
+            if (cmd.Tipo == TipoComando.Abandonar)
+            {
+                p.CambiarEstado(new EstadoFinPartida(p, MotivoFin.Abandono));
+                return r;
+            }
+
             Jugador j = p.Jugadores[cmd.JugadorId];
             if (j.Mano.Count == 0)
             {

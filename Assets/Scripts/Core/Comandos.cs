@@ -2,7 +2,9 @@ using System;
 
 namespace Licuadomino.Core
 {
-    public enum TipoComando { Colocar = 0, Robar = 1, Pasar = 2 }
+    public enum TipoComando { Colocar = 0, Robar = 1, Pasar = 2, Abandonar = 3 }
+
+
 
     public interface IComandoJugada
     {
@@ -135,6 +137,28 @@ namespace Licuadomino.Core
         public override string Describir(Partida p) => $"{p.Jugadores[JugadorId].Nombre} pasa";
     }
 
+
+
+    public class ComandoAbandonar : IComandoJugada
+    {
+        public TipoComando Tipo => TipoComando.Abandonar;
+        public int JugadorId { get; }
+
+        public ComandoAbandonar(int jugadorId) => JugadorId = jugadorId;
+
+        public ResultadoConexion Validar(Partida p)
+        {
+            if (JugadorId < 0 || JugadorId >= p.Jugadores.Count)
+                return ResultadoConexion.Error("Jugador inválido.");
+            return ResultadoConexion.Ok($"{p.Jugadores[JugadorId].Nombre} abandonó la partida.");
+        }
+
+        public void Ejecutar(Partida p) => p.Abandono = JugadorId;
+
+        public int[] Serializar() => new[] { (int)Tipo, JugadorId };
+        public string Describir(Partida p) => $"{p.Jugadores[JugadorId].Nombre} abandona";
+    }
+
     public static class ComandoSerializer
     {
         public static IComandoJugada Deserializar(int[] d)
@@ -147,6 +171,7 @@ namespace Licuadomino.Core
                     return new ComandoColocar(d[1], d[2], (Lado)d[3], (Fruta)d[4]);
                 case TipoComando.Robar: return new ComandoRobar(d[1]);
                 case TipoComando.Pasar: return new ComandoPasar(d[1]);
+                case TipoComando.Abandonar: return new ComandoAbandonar(d[1]);
                 default: throw new ArgumentException("Tipo de comando desconocido: " + d[0]);
             }
         }

@@ -29,8 +29,16 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     const int MinJugadores = 2;
     const int LargoCodigo = 4;
     const string Caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
-    const string PropIniciada = "iniciada";
     const string PrefNombre = "nombre";
+
+    const string EscenaJuego = "Juego";
+    const int MaxIntentosCrear = 5;
+    const int MaxReintentos = 3;
+    const float SegundosEntreReintentos = 3f;
+
+    int intentosCrear;
+    int reintentos;
+    bool saliendo;
 
     void Start()
     {
@@ -65,6 +73,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         if (!AplicarNombre()) return;
         BotonesConexion(false);
+        intentosCrear = 0;
         IntentarCrear();
     }
 
@@ -75,8 +84,10 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         var opciones = new RoomOptions
         {
             MaxPlayers = MaxJugadores,
-            IsVisible = false, 
-            IsOpen = true
+            IsVisible = false,
+            IsOpen = true,
+            PlayerTtl = 0,
+            EmptyRoomTtl = 0
         };
         PhotonNetwork.CreateRoom(codigo, opciones);
     }
@@ -101,9 +112,9 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.CurrentRoom.PlayerCount < MinJugadores) return;
 
         PhotonNetwork.CurrentRoom.IsOpen = false;
- 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable { { PropIniciada, true } });
-
+        botonIniciar.interactable = false;
+        Estado("Iniciando partida...");
+        PhotonNetwork.LoadLevel(EscenaJuego);
     }
 
     void SalirSala()
@@ -116,23 +127,42 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
+        reintentos = 0;
         Estado("Conectado (región: " + PhotonNetwork.CloudRegion + ")");
         BotonesConexion(true);
     }
 
+    void OnApplicationQuit() => saliendo = true;
+
     public override void OnDisconnected(DisconnectCause causa)
     {
-        Estado("Desconectado: " + causa + ". Reintentando...");
         MostrarPanelSala(false);
         BotonesConexion(false);
-        PhotonNetwork.ConnectUsingSettings();
+
+        if (saliendo || causa == DisconnectCause.DisconnectByClientLogic) return;
+
+        if (reintentos >= MaxReintentos)
+        {
+            Estado($"No se pudo conectar ({causa}). Revisa tu internet y recarga la página.");
+            return;
+        }
+
+        reintentos++;
+        Estado($"Desconectado ({causa}). Reintentando {reintentos}/{MaxReintentos}...");
+        Invoke(nameof(Reconectar), SegundosEntreReintentos);
     }
+
+    void Reconectar() => PhotonNetwork.ConnectUsingSettings();
 
     public override void OnCreateRoomFailed(short codigo, string mensaje)
     {
-
-        Debug.LogWarning("Crear sala falló (" + codigo + "): " + mensaje);
-        IntentarCrear();
+        if (codigo == ErrorCode.GameIdAlreadyExists && ++intentosCrear < MaxIntentosCrear)
+        {
+            IntentarCrear();
+            return;
+        }
+        Estado("No se pudo crear la sala: " + mensaje);
+        BotonesConexion(true);
     }
 
     public override void OnJoinRoomFailed(short codigo, string mensaje)
@@ -149,6 +179,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        AsegurarNombreUnico();
         Estado("En la sala.");
         MostrarPanelSala(true);
         ActualizarSala();
@@ -163,14 +194,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player nuevo) => ActualizarSala();
     public override void OnPlayerLeftRoom(Player otro) => ActualizarSala();
     public override void OnMasterClientSwitched(Player nuevoHost) => ActualizarSala();
+    public override void OnPlayerPropertiesUpdate(Player jugador, Hashtable cambios) => ActualizarSala();
 
-    public override void OnRoomPropertiesUpdate(Hashtable cambios)
-    {
-        if (cambios.TryGetValue(PropIniciada, out object valor) && valor is bool b && b)
-            Estado("¡Partida iniciada! Todos deberían ver este mensaje.");
-    }
-
- 
 
     void ActualizarSala()
     {
@@ -205,6 +230,24 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = nombre;
         PlayerPrefs.SetString(PrefNombre, nombre);
         return true;
+    }
+
+    void AsegurarNombreUnico()
+    {
+        string original = PhotonNetwork.NickName;
+        string nombre = original;
+        int n = 2;
+        while (NombreOcupado(nombre))
+            nombre = $"{original} {n++}";
+        PhotonNetwork.NickName = nombre;
+    }
+
+    bool NombreOcupado(string nombre)
+    {
+        foreach (Player p in PhotonNetwork.PlayerListOthers)
+            if (string.Equals(p.NickName, nombre, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+        return false;
     }
 
     static string GenerarCodigo()

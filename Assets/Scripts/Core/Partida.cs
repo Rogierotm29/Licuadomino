@@ -3,11 +3,7 @@ using System.Collections.Generic;
 
 namespace Licuadomino.Core
 {
-    /// <summary>
-    /// Contexto del patrón State y sujeto del patrón Observer.
-    /// Guarda el estado completo de una partida. En red, SOLO el host tiene una Partida;
-    /// los demás reciben lo que les toca ver.
-    /// </summary>
+
     public class Partida
     {
         public const int FichasPorJugador = 7;
@@ -26,19 +22,20 @@ namespace Licuadomino.Core
         public int JugadorInicial { get; private set; }
         public int Turno { get; private set; }
         public int PasesSeguidos { get; internal set; }
+        public int Abandono { get; internal set; } = -1;
         public ResultadoPartida Resultado { get; internal set; }
 
         public Jugador JugadorEnTurno => jugadores[Turno];
         public int FichasEnPozo => pozo.Count;
         public bool Terminada => Estado is EstadoFinPartida;
 
-        // ---------- Observer: la UI, el audio y la red se suscriben a estos eventos ----------
+
         public event Action<IEstadoPartida> EstadoCambiado;
         public event Action<Jugador> TurnoCambiado;
-        public event Action<Jugador, Jugada, string> FichaJugada;   // jugador, jugada, mensaje del licuado
+        public event Action<Jugador, Jugada, string> FichaJugada;  
         public event Action<Jugador, Ficha> FichaRobada;
         public event Action<Jugador> TurnoPasado;
-        public event Action<int, string> JugadaRechazada;           // jugadorId, por qué
+        public event Action<int, string> JugadaRechazada;          
         public event Action<ResultadoPartida> PartidaTerminada;
 
         public Partida(IReadOnlyList<string> nombres, IReglaCompatibilidad regla, int semilla, int jugadorInicial = 0)
@@ -53,18 +50,18 @@ namespace Licuadomino.Core
             JugadorInicial = jugadorInicial % nombres.Count;
         }
 
-        // ---------- API pública ----------
+
 
         public void Iniciar() => CambiarEstado(new EstadoRepartiendo(this));
 
-        /// <summary>Única puerta de entrada para modificar la partida.</summary>
+
         public ResultadoConexion Enviar(IComandoJugada cmd)
         {
             if (Estado == null) return ResultadoConexion.Error("La partida no ha iniciado.");
             return Estado.Procesar(cmd);
         }
 
-        /// <summary>Nueva ronda: otra semilla y empieza el siguiente jugador.</summary>
+
         public void Reiniciar(int nuevaSemilla)
         {
             Semilla = nuevaSemilla;
@@ -72,10 +69,8 @@ namespace Licuadomino.Core
             Iniciar();
         }
 
-        /// <summary>Lo que sí puede ver un jugador de sus rivales: solo cuántas fichas tienen.</summary>
         public int FichasDe(int jugadorId) => jugadores[jugadorId].Mano.Count;
 
-        /// <summary>Foto de la partida desde los ojos de un jugador (sin las manos ajenas).</summary>
         public EstadoVisible VistaPara(int jugadorId)
         {
             var e = new EstadoVisible
@@ -99,7 +94,6 @@ namespace Licuadomino.Core
             return e;
         }
 
-        // ---------- Usado por estados y comandos ----------
 
         internal void CambiarEstado(IEstadoPartida nuevo)
         {
@@ -115,6 +109,7 @@ namespace Licuadomino.Core
             historial.Clear();
             Resultado = null;
             PasesSeguidos = 0;
+            Abandono = -1;
             foreach (var j in jugadores) j.VaciarMano();
 
             List<Ficha> mazo = GeneradorFichas.Barajado(new Random(Semilla));

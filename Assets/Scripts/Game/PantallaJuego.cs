@@ -15,7 +15,7 @@ public class PantallaJuego : MonoBehaviour
     [SerializeField] BotonLado botonDerecha;
     [SerializeField] Button botonPasar;
     [SerializeField] TMP_Text textoTurno;
-    [SerializeField] TMP_Text textoMensaje;
+    [SerializeField] AvisoTemporal aviso;
     [SerializeField] Color colorNormal = new Color(0.2f, 0.2f, 0.2f);
     [SerializeField] Color colorError = new Color(0.8f, 0.15f, 0.2f);
 
@@ -52,11 +52,8 @@ public class PantallaJuego : MonoBehaviour
         RefrescarLados();
     }
 
-    public void MostrarMensaje(string texto, bool esError)
-    {
-        textoMensaje.text = texto;
-        textoMensaje.color = esError ? colorError : colorNormal;
-    }
+    public void MostrarMensaje(string texto, bool esError) =>
+        aviso.Mostrar(texto, esError ? colorError : colorNormal);
 
     void RefrescarLados()
     {

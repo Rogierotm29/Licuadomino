@@ -69,6 +69,7 @@ public static class CrearEscenaJuego
         Colocar(turno.gameObject, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -185), new Vector2(1200, 56));
 
         TMP_Text mensaje = Texto("TextoMensaje", c, "", 30, oscuro, false);
+        var aviso = mensaje.gameObject.AddComponent<AvisoTemporal>();
         Colocar(mensaje.gameObject, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 262), new Vector2(1400, 60));
 
         var manoGo = NuevoUI("Mano", c);
@@ -108,7 +109,7 @@ public static class CrearEscenaJuego
         Asignar(pantalla, "botonDerecha", der);
         Asignar(pantalla, "botonPasar", pasar);
         Asignar(pantalla, "textoTurno", turno);
-        Asignar(pantalla, "textoMensaje", mensaje);
+        Asignar(pantalla, "aviso", aviso);
 
         var juegoGo = new GameObject("JuegoLocal");
         var juego = juegoGo.AddComponent<JuegoLocal>();

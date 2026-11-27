@@ -27,7 +27,7 @@ namespace Licuadomino.Core
         public static string Nombre(Fruta f) => nombres[(int)f];
         public static Perfil PerfilDe(Fruta f) => perfiles[(int)f];
 
-        static readonly Perfil[] complementos = { Perfil.Acida, Perfil.Cremosa, Perfil.Refrescante, Perfil.Dulce };
+        static readonly Perfil[] complementos = { Perfil.Dulce, Perfil.Refrescante, Perfil.Cremosa, Perfil.Acida };
         static readonly string[] adjetivos = { "cremosa", "ácida", "dulce", "refrescante" };
         static readonly string[] adjetivosPlural = { "cremosas", "ácidas", "dulces", "refrescantes" };
         static readonly string[] excesos = { "queda muy espeso", "queda muy agrio", "queda empalagoso", "queda aguado" };
@@ -40,9 +40,9 @@ namespace Licuadomino.Core
         public static string Exceso(Perfil p) => excesos[(int)p];
 
         public static string RazonBalance(Perfil p) =>
-            p == Perfil.Cremosa || p == Perfil.Acida
-                ? "Lo ácido corta lo cremoso."
-                : "Lo refrescante aligera lo dulce.";
+            p == Perfil.Cremosa || p == Perfil.Dulce
+                ? "La base cremosa le da cuerpo y la fruta dulce le da sabor."
+                : "El ácido le da chispa a lo refrescante.";
 
         public static IEnumerable<Fruta> DePerfil(Perfil p)
         {
