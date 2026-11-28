@@ -12,6 +12,8 @@ public class SelectorModo : MonoBehaviour
     [SerializeField] GameObject botonSalir;
 
     [SerializeField] GuiaLicuados guia;
+
+    [SerializeField] GameObject botonMenu;
     void Awake()
     {
         bool enRed = PhotonNetwork.InRoom;
@@ -20,6 +22,7 @@ public class SelectorModo : MonoBehaviour
         red.SetActive(enRed);
         botonNuevaPartida.SetActive(!enRed);
         botonSalir.SetActive(enRed);
+        botonMenu.SetActive(!enRed);
         Debug.Log(enRed ? $"[Modo] Red ({(PhotonNetwork.IsMasterClient ? "host" : "cliente")})" : "[Modo] Local (prueba)");
         if (!enRed) guia.Mostrar(null, false);
     }

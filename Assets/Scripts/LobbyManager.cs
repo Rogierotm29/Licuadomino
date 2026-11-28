@@ -25,7 +25,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [Header("General")]
     [SerializeField] TMP_Text textoEstado;
 
-    const int MaxJugadores = 4;
+    const int MaxJugadores = 2;
     const int MinJugadores = 2;
     const int LargoCodigo = 4;
     const string Caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 

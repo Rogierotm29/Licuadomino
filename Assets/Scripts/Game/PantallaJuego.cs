@@ -46,7 +46,7 @@ public class PantallaJuego : MonoBehaviour
         botonPasar.interactable = e.EsMiTurno;
 
         if (e.Terminada)
-            textoTurno.text = "Fin de la partida. " + e.Resultado;
+            textoTurno.text = "Fin de la partida.";
         else if (e.EsMiTurno)
             textoTurno.text = $"Tu turno, {e.Nombres[e.MiId]}";
         else
