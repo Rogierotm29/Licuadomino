@@ -9,12 +9,11 @@ public class ClienteRed : MonoBehaviourPunCallbacks, IOnEventCallback
     [SerializeField] PantallaJuego pantalla;
 
     bool esperandoRespuesta;
+    public event System.Action<EstadoVisible> EstadoRecibido;
 
     void Start()
     {
         pantalla.Accion += EnviarComando;
-        pantalla.MostrarMensaje("Esperando a los demás jugadores...", false);
-        EnvioRed.AlHost(CodigosRed.Listo, null);
     }
 
     void OnDestroy()
@@ -44,7 +43,9 @@ public class ClienteRed : MonoBehaviourPunCallbacks, IOnEventCallback
         esperandoRespuesta = false;
         try
         {
-            pantalla.Mostrar(SerializadorEstado.Desempacar(datos as object[]));
+            EstadoVisible e = SerializadorEstado.Desempacar(datos as object[]);
+            pantalla.Mostrar(e);
+            EstadoRecibido?.Invoke(e);
         }
         catch (System.ArgumentException e)
         {

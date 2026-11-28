@@ -20,6 +20,7 @@ public class HostPartida : MonoBehaviourPunCallbacks, IOnEventCallback
         {
             case CodigosRed.Listo: RecibirListo(ev.Sender); break;
             case CodigosRed.Comando: RecibirComando(ev.Sender, ev.CustomData); break;
+            case CodigosRed.PedirRevancha: RecibirRevancha(ev.Sender); break;
         }
     }
 
@@ -74,6 +75,13 @@ public class HostPartida : MonoBehaviourPunCallbacks, IOnEventCallback
 
         d[1] = asiento;
 
+
+        if (d[0] == (int)TipoComando.Abandonar)
+        {
+            EnvioRed.MensajeA(actor, "Jugada inválida.", true);
+            return;
+        }
+
         IComandoJugada cmd;
         try
         {
@@ -91,6 +99,34 @@ public class HostPartida : MonoBehaviourPunCallbacks, IOnEventCallback
             EnvioRed.MensajeA(actor, r.Mensaje, true);
             return;
         }
+        EnviarEstados();
+
+
+
+    }
+
+
+    public override void OnPlayerLeftRoom(Player otro)
+    {
+        if (partida == null || partida.Terminada) return;
+        int asiento = System.Array.IndexOf(actores, otro.ActorNumber);
+        if (asiento < 0) return;
+
+        partida.Enviar(new ComandoAbandonar(asiento));
+        EnviarEstados();
+    }
+
+
+
+    void RecibirRevancha(int actor)
+    {
+        if (partida == null || !partida.Terminada) return;
+        if (actor != PhotonNetwork.LocalPlayer.ActorNumber) return;
+        if (partida.Resultado.Motivo == MotivoFin.Abandono) return;
+        if (PhotonNetwork.CurrentRoom.PlayerCount != actores.Length) return;
+
+        partida.Reiniciar(Random.Range(0, int.MaxValue));
+        EnvioRed.MensajeATodos($"Revancha: empieza {partida.JugadorEnTurno.Nombre}.", false);
         EnviarEstados();
     }
 }

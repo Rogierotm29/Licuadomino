@@ -56,9 +56,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         MostrarPanelSala(false);
         BotonesConexion(false);
 
-        if (PhotonNetwork.IsConnectedAndReady)
+        if (PhotonNetwork.IsConnectedAndReady && !PhotonNetwork.InRoom)
         {
             OnConnectedToMaster();
+        }
+        else if (PhotonNetwork.IsConnected)
+        {
+            Estado("Regresando al servidor...");
         }
         else
         {
