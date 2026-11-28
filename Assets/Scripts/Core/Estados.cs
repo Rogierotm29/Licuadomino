@@ -62,9 +62,21 @@ namespace Licuadomino.Core
                 return r;
             }
 
+            if (cmd is ComandoColocar c && GeneradorFichas.PorId(c.FichaId).EsDoble)
+                ServirDoblePorcion(j);
+
             if (cmd.Tipo != TipoComando.Robar)
                 p.AvanzarTurno();
             return r;
+        }
+
+        void ServirDoblePorcion(Jugador quien)
+        {
+            if (p.FichasEnPozo == 0) return;
+            Jugador siguiente = p.Jugadores[(p.Turno + 1) % p.Jugadores.Count];
+            Ficha f = p.SacarDelPozo();
+            siguiente.Agregar(f);
+            p.NotificarDoblePorcion(quien, siguiente, f);
         }
     }
 

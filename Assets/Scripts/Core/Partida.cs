@@ -38,6 +38,8 @@ namespace Licuadomino.Core
         public event Action<int, string> JugadaRechazada;          
         public event Action<ResultadoPartida> PartidaTerminada;
 
+        public event Action<Jugador, Jugador, Ficha> DoblePorcion;
+
         public Partida(IReadOnlyList<string> nombres, IReglaCompatibilidad regla, int semilla, int jugadorInicial = 0)
         {
             if (nombres == null || nombres.Count < MinJugadores || nombres.Count > MaxJugadores)
@@ -143,5 +145,7 @@ namespace Licuadomino.Core
         internal void NotificarTurnoPasado(Jugador j) => TurnoPasado?.Invoke(j);
         internal void NotificarRechazo(int jugadorId, string msg) => JugadaRechazada?.Invoke(jugadorId, msg);
         internal void NotificarFin() => PartidaTerminada?.Invoke(Resultado);
+
+        internal void NotificarDoblePorcion(Jugador quien, Jugador siguiente, Ficha f) => DoblePorcion?.Invoke(quien, siguiente, f);
     }
 }

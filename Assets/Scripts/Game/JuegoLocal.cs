@@ -25,6 +25,7 @@ public class JuegoLocal : MonoBehaviour
         partida.FichaRobada += (j, f) => pantalla.MostrarMensaje($"{j.Nombre} robó una ficha del pozo.", false);
         partida.TurnoPasado += j => pantalla.MostrarMensaje($"{j.Nombre} pasó: no tenía con qué jugar.", false);
         partida.PartidaTerminada += r => pantalla.MostrarMensaje(r.ToString(), false);
+        partida.DoblePorcion += (q, s, f) => pantalla.MostrarMensaje($"¡Doble porción! {q.Nombre} jugó un doble y a {s.Nombre} le toca una ficha extra.", false);
 
         partida.Iniciar();
         pantalla.MostrarMensaje("Elige una ficha de tu mano y luego de qué lado de la mesa ponerla.", false);

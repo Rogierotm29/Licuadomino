@@ -21,6 +21,9 @@ public class PantallaJuego : MonoBehaviour
 
     public event Action<IComandoJugada> Accion;
 
+    public event System.Action<EstadoVisible> EstadoMostrado;
+    public event System.Action<string, bool> MensajeMostrado;
+
     readonly IReglaCompatibilidad regla = new ReglaLicuados();
     EstadoVisible estado;
 
@@ -50,10 +53,14 @@ public class PantallaJuego : MonoBehaviour
             textoTurno.text = $"Turno de {e.Nombres[e.Turno]}";
 
         RefrescarLados();
+        EstadoMostrado?.Invoke(e);
     }
 
-    public void MostrarMensaje(string texto, bool esError) =>
+    public void MostrarMensaje(string texto, bool esError)
+    {
         aviso.Mostrar(texto, esError ? colorError : colorNormal);
+        MensajeMostrado?.Invoke(texto, esError);
+    }
 
     void RefrescarLados()
     {
